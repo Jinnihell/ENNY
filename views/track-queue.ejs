@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track My Queue - ESCR DQMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: linear-gradient(135deg, #1a2a4d 0%, #0d1a33 100%);
+      min-height: 100vh;
+    }
+    
+    /* Navigation Bar */
+    .navbar {
+      background: linear-gradient(135deg, #1a2a4d, #2d4a8d);
+      padding: 15px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .logo-section { display: flex; align-items: center; gap: 15px; }
+    .logo-section img { width: 50px; height: 50px; border-radius: 10px; }
+    .logo-section .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .logo-section .logo-text span:first-child {
+      font-weight: bold;
+      font-size: 20px;
+      color: white;
+    }
+    .logo-section .logo-text span:last-child {
+      font-size: 12px;
+      color: #ff8c00;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .nav-links .home-btn {
+      background: #ff8c00;
+      color: #1a2a4d;
+      font-weight: bold;
+    }
+    .nav-links .home-btn:hover {
+      background: #ffa500;
+    }
+    
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 40px 20px;
+    }
+    
+    h1 {
+      color: white;
+      font-size: 42px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #aaa;
+      font-size: 18px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    /* Search Container */
+    .search-container {
+      background: white;
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+    }
+    
+    .search-box {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .search-box input {
+      padding: 18px 25px;
+      font-size: 22px;
+      border: 3px solid #e0e0e0;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .search-box input:focus {
+      border-color: #1a2a4d;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(26,42,77,0.1);
+    }
+    
+    .search-box button {
+      padding: 18px 45px;
+      background: linear-gradient(135deg, #ff8c00, #ffa500);
+      color: #1a2a4d;
+      border: none;
+      border-radius: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 20px rgba(255,140,0,0.3);
+    }
+    .search-box button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255,140,0,0.4);
+    }
+    
+    /* Queue Status Display */
+    .queue-status {
+      background: white;
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-top: 30px;
+      width: 100%;
+      max-width: 700px;
+      display: none;
+      text-align: center;
+      animation: slideUp 0.5s ease;
+    }
+    .queue-status.active { display: block; }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .ticket-number {
+      font-size: 90px;
+      font-weight: bold;
+      color: #1a2a4d;
+      margin: 20px 0;
+      line-height: 1;
+    }
+    
+    .position {
+      font-size: 28px;
+      color: #ff8c00;
+      margin-bottom: 25px;
+      font-weight: bold;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 15px 35px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .status-waiting { background: #fff3e0; color: #ff9800; }
+    .status-called { background: #e8f5e9; color: #4caf50; }
+    .status-serving { background: #e3f2fd; color: #2196f3; }
+    .status-served { background: #f3e5f5; color: #9c27b0; }
+    
+    .info-text {
+      margin-top: 25px;
+      color: #888;
+      font-size: 14px;
+    }
+    
+    /* Notification Alert */
+    .notification-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      animation: popIn 0.4s ease;
+    }
+    .notification-alert.show { display: block; }
+    
+    @keyframes popIn {
+      from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    .notification-alert i {
+      font-size: 80px;
+      color: #4caf50;
+      margin-bottom: 25px;
+    }
+    .notification-alert h2 { color: #1a2a4d; margin: 0 0 15px 0; font-size: 32px; }
+    .notification-alert p { color: #666; font-size: 22px; margin-bottom: 25px; }
+    .notification-alert button {
+      padding: 15px 50px;
+      background: #1a2a4d;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .notification-alert button:hover { background: #2d4a8d; }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      display: none;
+    }
+    .overlay.show { display: block; }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .navbar { padding: 15px 20px; flex-direction: column; gap: 15px; }
+      .nav-links { flex-wrap: wrap; justify-content: center; }
+      h1 { font-size: 32px; }
+      .search-container { padding: 25px; }
+      .search-box input { font-size: 18px; }
+      .search-box button { width: 100%; }
+      .ticket-number { font-size: 60px; }
+      .queue-status { padding: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo-section">
+      <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50x50?text=ESCR'">
+      <div class="logo-text">
+        <span>East Systems Colleges of Rizal</span>
+        <span>DQMS</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/"><i class="fa fa-home"></i> Home</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <h1>Track Your Queue</h1>
+    <p class="subtitle">Enter your ticket number to track your position in real-time</p>
+    
+    <div class="search-container">
+      <div class="search-box">
+        <input type="text" id="ticketInput" placeholder="Enter ticket number (e.g., A001)" />
+        <button onclick="trackQueue()"><i class="fa fa-search"></i> Track</button>
+      </div>
+    </div>
+    
+    <div class="queue-status" id="queueStatus">
+      <div class="ticket-number" id="displayTicket">A001</div>
+      <div class="position" id="displayPosition">Your Position: #3</div>
+      <div class="status-badge status-waiting" id="displayStatus">Waiting</div>
+      <p class="info-text">
+        <i class="fa fa-info-circle"></i> This page will auto-refresh every 10 seconds
+      </p>
+    </div>
+  </div>
+  
+  <div class="overlay" id="overlay"></div>
+  <div class="notification-alert" id="notificationAlert">
+    <i class="fa fa-bell"></i>
+    <h2>Your Turn!</h2>
+    <p>Please proceed to Window <span id="notifyWindow">1</span></p>
+    <button onclick="closeNotification()">OK</button>
+  </div>
+  
+  <script>
+    let currentTicket = '';
+    let refreshInterval = null;
+    let lastStatus = '';
+    
+    function trackQueue() {
+      const ticket = document.getElementById('ticketInput').value.trim().toUpperCase();
+      if (!ticket) {
+        alert('Please enter your ticket number');
+        return;
+      }
+      currentTicket = ticket;
+      fetchQueueStatus();
+      // Auto-refresh every 10 seconds
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(fetchQueueStatus, 10000);
+    }
+    
+    async function fetchQueueStatus() {
+      if (!currentTicket) return;
+      
+      try {
+        const response = await fetch(`/api/queue-status?ticket=${currentTicket}`);
+        const data = await response.json();
+        
+        if (data.found) {
+          document.getElementById('queueStatus').classList.add('active');
+          document.getElementById('displayTicket').textContent = data.ticket;
+          document.getElementById('displayPosition').textContent = `Your Position: #${data.position}`;
+          
+          const statusBadge = document.getElementById('displayStatus');
+          statusBadge.className = 'status-badge';
+          
+          let statusText = 'Waiting';
+          if (data.status === 'called') {
+            statusBadge.classList.add('status-called');
+            statusText = 'Called - Please Proceed!';
+            // Show notification only when status changes to called
+            if (lastStatus !== 'called') {
+              showNotification(data.window);
+            }
+          } else if (data.status === 'serving') {
+            statusBadge.classList.add('status-serving');
+            statusText = 'Currently Serving';
+          } else if (data.status === 'served') {
+            statusBadge.classList.add('status-served');
+            statusText = 'Served';
+          } else {
+            statusBadge.classList.add('status-waiting');
+            statusText = 'Waiting';
+          }
+          statusBadge.textContent = statusText;
+          lastStatus = data.status;
+        } else {
+          alert('Ticket not found. Please check your ticket number.');
+          document.getElementById('queueStatus').classList.remove('active');
+        }
+      } catch (error) {
+        console.error('Error fetching queue status:', error);
+        alert('Error tracking queue. Please try again.');
+      }
+    }
+    
+    function showNotification(window) {
+      document.getElementById('notifyWindow').textContent = window || '1';
+      document.getElementById('overlay').classList.add('show');
+      document.getElementById('notificationAlert').classList.add('show');
+      playNotificationSound();
+    }
+    
+    function closeNotification() {
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('notificationAlert').classList.remove('show');
+    }
+    
+    function playNotificationSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.3;
+        
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 200);
+      } catch (e) {
+        console.log('Could not play notification sound');
+      }
+    }
+    
+    // Check for notification on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    const notifyTicket = urlParams.get('notify');
+    if (notifyTicket) {
+      document.getElementById('ticketInput').value = notifyTicket;
+      trackQueue();
+    }
+  </script>
+</body>
+</html>

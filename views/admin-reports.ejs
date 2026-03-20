@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Settings - ESCR DQMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); margin: 0; min-height: 100vh; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .logo-box { display: flex; align-items: center; gap: 15px; }
+    .logo-box img { width: 70px; }
+    .logo-box .title { font-weight: bold; color: #1a2a4d; }
+    .logo-box .subtitle { font-size: 12px; color: #666; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { text-decoration: none; color: #1a2a4d; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .nav-links a:hover { color: #ff8c00; }
+    .window-badge { background: #1a2a4d; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .title-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .title-section h2 { color: #1a2a4d; margin: 0; display: flex; align-items: center; gap: 10px; }
+    .header-buttons { display: flex; gap: 10px; }
+    .btn-print { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .btn-print:hover { opacity: 0.9; }
+    .btn-pdf { background: #e74c3c; }
+    .btn-print-action { background: #28a745; }
+    .filter-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; }
+    .filter-bar input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .filter-bar button { background: #1a2a4d; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+    .summary-row { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 25px; }
+    .hero-card { background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .hero-card h1 { margin: 0; font-size: 64px; color: #1a2a4d; }
+    .hero-card p { margin: 0; color: #666; font-weight: bold; letter-spacing: 1px; }
+    .top-win-card { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .top-win-card p { margin: 0; opacity: 0.8; }
+    .top-win-card h2 { margin: 10px 0; color: #1a2a4d; font-size: 36px; }
+    .top-win-card small { color: #28a745; font-weight: bold; }
+    .chart-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 25px; }
+    .chart-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .full-chart { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px; }
+    .full-chart h4 { text-align: center; color: #1a2a4d; margin-top: 0; }
+    .btn-back { display: inline-block; background: #6c757d; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+    .btn-back:hover { background: #5a6268; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-box">
+      <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50x50?text=ESCR'">
+      <div>
+        <div class="title">ESCR DQMS</div>
+        <div class="subtitle">East Systems Colleges of Rizal</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/staff-dashboard"><i class="fa fa-home"></i> Dashboard</a>
+      <a href="/admin-settings"><i class="fa fa-cog"></i> Settings</a>
+      <div class="window-badge">Window <%= windowId || '1' %></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="title-section">
+      <h2><i class="fa fa-chart-line"></i> System Performance</h2>
+      <div class="header-buttons">
+        <button class="btn-print btn-pdf" onclick="exportPDF()"><i class="fa fa-file-pdf"></i> Export PDF</button>
+        <button class="btn-print btn-print-action" onclick="window.print()"><i class="fa fa-print"></i> Print</button>
+      </div>
+    </div>
+
+    <form class="filter-bar" method="GET">
+      <input type="date" name="start_date" value="<%= startDate || '' %>">
+      <input type="date" name="end_date" value="<%= endDate || '' %>">
+      <button type="submit">Filter</button>
+    </form>
+
+    <div class="summary-row">
+      <div class="hero-card">
+        <h1><%= totalServed || 0 %></h1>
+        <p>TOTAL STUDENTS SERVED</p>
+      </div>
+      <div class="top-win-card">
+        <p>BEST SERVICE WINDOW</p>
+        <h2>WINDOW <%= topWindow || '-' %></h2>
+        <small><%= topWindowCount || 0 %> Served</small>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <canvas id="pieChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <div class="full-chart">
+      <h4>Hourly Student Traffic (Peak Hours)</h4>
+      <canvas id="lineChart" style="max-height: 250px;"></canvas>
+    </div>
+
+    <a href="/reports-settings" class="btn-back">← Back to Menu</a>
+  </div>
+
+  <script id="chart-data" type="application/json">
+    <%- JSON.stringify({ catLabels: catLabels || ['Assessments', 'Enrollment', 'Payments', 'Other Concerns'], catVals: catVals || [0, 0, 0, 0], hourVals: hourVals || [0,0,0,0,0,0,0,0,0,0] }) %>
+  </script>
+  <script>
+    // Get chart data from server-rendered JSON
+    var chartData = JSON.parse(document.getElementById('chart-data').textContent);
+    
+    var catLabels = chartData.catLabels;
+    var catVals = chartData.catVals;
+    var hourVals = chartData.hourVals;
+    var hourLabels = ["8AM", "9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM"];
+
+    // Create charts
+    var pieChart = new Chart(document.getElementById('pieChart'), {
+      type: 'pie',
+      data: { 
+        labels: catLabels, 
+        datasets: [{ 
+          data: catVals, 
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] 
+        }] 
+      },
+      options: { responsive: true }
+    });
+
+    var barChart = new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: { 
+        labels: catLabels, 
+        datasets: [{ 
+          label: 'Transactions', 
+          data: catVals, 
+          backgroundColor: '#1a2a4d' 
+        }] 
+      },
+      options: { responsive: true }
+    });
+
+    var lineChart = new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: { 
+        labels: hourLabels, 
+        datasets: [{ 
+          label: 'Students per Hour', 
+          data: hourVals, 
+          borderColor: '#1a2a4d', 
+          backgroundColor: 'rgba(26, 42, 77, 0.1)',
+          fill: true,
+          tension: 0.4 
+        }] 
+      },
+      options: { 
+        responsive: true,
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } 
+      }
+    });
+
+    function exportPDF() {
+      alert('Generating PDF report...');
+    }
+  </script>
+</body>
+</html>

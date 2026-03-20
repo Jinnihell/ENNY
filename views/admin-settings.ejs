@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings - ESCR DQMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); margin: 0; min-height: 100vh; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .logo-box { display: flex; align-items: center; gap: 15px; }
+    .logo-box img { width: 70px; }
+    .logo-box h2 { margin: 0; color: #1a2a4d; font-size: 20px; }
+    .logo-box span { font-size: 12px; color: #666; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { text-decoration: none; color: #1a2a4d; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .nav-links a:hover { color: #ff8c00; }
+    .window-badge { background: #1a2a4d; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+    .settings-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    .settings-container h1 { color: #1a2a4d; display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .success-msg { background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb; display: flex; align-items: center; gap: 10px; }
+    .setting-item { background: white; border-radius: 12px; margin-bottom: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .setting-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f8f9fa; cursor: pointer; transition: background 0.3s; }
+    .setting-header:hover { background: #e9ecef; }
+    .setting-header h2 { margin: 0; font-size: 18px; color: #1a2a4d; display: flex; align-items: center; gap: 12px; }
+    .setting-content { display: none; padding: 20px; border-top: 1px solid #eee; }
+    .setting-content.active { display: block; }
+    .setting-content p { margin: 0 0 15px 0; color: #666; }
+    .setting-content select, .setting-content input[type="text"] { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; max-width: 300px; }
+    .action-btn { background: #1a2a4d; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+    .action-btn:hover { background: #2d4a8d; }
+    .danger-zone { background: white; border-radius: 12px; padding: 25px; margin-top: 30px; border: 2px solid #dc3545; }
+    .danger-zone h3 { color: #dc3545; margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px; }
+    .danger-zone p { color: #666; margin-bottom: 15px; }
+    .btn-reset { background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .btn-reset:hover { background: #c82333; }
+    .back-btn { display: inline-block; background: #6c757d; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+    .back-btn:hover { background: #5a6268; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-box">
+      <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50x50?text=ESCR'">
+      <div>
+        <h2>ESCR DQMS</h2>
+        <span>East Systems Colleges of Rizal</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/staff-dashboard"><i class="fa fa-home"></i> Dashboard</a>
+      <a href="/admin-reports"><i class="fa fa-chart-line"></i> Reports</a>
+      <div class="window-badge">Window <%= windowId || '1' %></div>
+    </div>
+  </div>
+
+  <div class="settings-container">
+    <h1><i class="fa fa-cog"></i> System Settings</h1>
+    
+    <% if (message) { %>
+    <div class="success-msg">
+      <i class="fa fa-check-circle"></i> <%= message %>
+    </div>
+    <% } %>
+    
+    <hr style="border: 1px solid rgba(0,0,0,0.1); margin-bottom: 30px;">
+
+    <div class="setting-item">
+      <div class="setting-header" onclick="toggleAccordion(this)">
+        <h2><i class="fa fa-language"></i> Language</h2>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="setting-content">
+        <p>Select the primary language for the Kiosk Interface:</p>
+        <select>
+          <option>English (US)</option>
+          <option>Filipino (Tagalog)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-header" onclick="toggleAccordion(this)">
+        <h2><i class="fa fa-palette"></i> Theme / Color Display</h2>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="setting-content">
+        <p>Toggle between Light and Dark mode for the dashboard:</p>
+        <button class="action-btn" onclick="toggleDarkMode()">Toggle Dark/Light Mode</button>
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-header" onclick="toggleAccordion(this)">
+        <h2><i class="fa fa-bell"></i> Feedback and Notifications Alert</h2>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="setting-content">
+        <label><input type="checkbox" checked> Enable "Ding" sound for new tickets</label><br><br>
+        <label><input type="checkbox" checked> Show desktop pop-up notifications</label>
+      </div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-header" onclick="toggleAccordion(this)">
+        <h2><i class="fa fa-database"></i> Database Backup & Recovery</h2>
+        <i class="fa fa-chevron-down"></i>
+      </div>
+      <div class="setting-content">
+        <p>Download a complete backup of the Queue and Transaction History tables.</p>
+        <button class="action-btn" style="background-color: #27ae60;" onclick="downloadBackup()">
+          <i class="fa fa-download"></i> Download SQL Backup
+        </button>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+          Note: It is recommended to back up your data every Friday afternoon.
+        </p>
+      </div>
+    </div>
+
+    <div class="danger-zone">
+      <h3><i class="fa fa-exclamation-triangle"></i> System Maintenance</h3>
+      <p>Use this to clear all active queues. Note: This will not delete history, only pending tickets.</p>
+      <button class="btn-reset" onclick="confirmReset()">Clear Active Queue (New Day)</button>
+    </div>
+
+    <a href="/reports-settings" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Menu</a>
+  </div>
+
+  <script>
+    function toggleAccordion(header) {
+      const content = header.nextElementSibling;
+      const icon = header.querySelector('.fa-chevron-down');
+      content.classList.toggle('active');
+      if (content.classList.contains('active')) {
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+      } else {
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+      }
+    }
+
+    function toggleDarkMode() {
+      alert('Dark mode toggle - This feature requires implementation');
+    }
+
+    function downloadBackup() {
+      window.location.href = '/download-backup';
+    }
+
+    function confirmReset() {
+      if (confirm('Are you sure you want to clear all active queues? This action cannot be undone.')) {
+        fetch('/reset-all-queues', { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+            alert(data.message || 'Queues cleared successfully!');
+          })
+          .catch(err => {
+            alert('Error clearing queues');
+          });
+      }
+    }
+  </script>
+</body>
+</html>

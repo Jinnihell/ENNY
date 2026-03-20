@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Active Queues - ESCR DQMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); }
+    .sidebar { width: 250px; background-color: #1a2a4d; color: white; display: flex; flex-direction: column; padding: 20px; height: 100vh; position: fixed; top: 0; left: 0; box-sizing: border-box; }
+    .sidebar-header { text-align: center; margin-bottom: 30px; }
+    .sidebar-header img { width: 70px; margin-bottom: 10px; }
+    .sidebar h2 { font-size: 18px; margin: 10px 0; }
+    .switch-link { color: #a1c4fd; text-decoration: none; font-size: 12px; border-bottom: 1px solid; margin-top: 10px; display: block; text-align: center; }
+    .nav-links { margin-top: 30px; list-style: none; padding: 0; }
+    .nav-links li { margin: 10px 0; }
+    .nav-links a { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 16px; padding: 12px 15px; border-radius: 8px; }
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: rgba(255,255,255,0.1); color: #a1c4fd; }
+    .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .sidebar-footer a { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; }
+    .main-content { margin-left: 250px; padding: 40px; }
+    .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .content-header h1 { margin: 0; color: #1a2a4d; font-size: 28px; }
+    .table-container { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background-color: #1a2a4d; color: white; }
+    th { padding: 18px; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+    td { padding: 16px; border-bottom: 1px solid #eee; color: #444; }
+    tr:hover { background-color: #f9faff; }
+    .badge { background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .btn-serve { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-serve:hover { background: #218838; }
+    .search-input { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; width: 300px; outline: none; }
+    .search-input:focus { border-color: #1a2a4d; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50x50?text=ESCR'">
+      <p style="font-size: 12px; margin: 0;">East Systems Colleges of Rizal</p>
+      <h2>ESCR DQMS<br>Window No: <%= windowId %></h2>
+      <a href="/window-selection" class="switch-link">Switch Window</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/staff-dashboard"><i class="fa fa-user"></i> Dashboard</a></li>
+      <li><a href="/active-queues" class="active"><i class="fa fa-history"></i> Active Queues</a></li>
+      <li><a href="/history"><i class="fa fa-paperclip"></i> History</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="/admin-selection"><i class="fa fa-arrow-left"></i> Back to Selection</a>
+      <a href="/logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="content-header">
+      <h1>Active Queues (<%= currentCategory %>)</h1>
+      <input type="text" class="search-input" id="searchQueue" placeholder="Search queue number...">
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Queue No.</th>
+            <th>Student Name</th>
+            <th>BLK & Course</th>
+            <th>Year</th>
+            <th>Status</th>
+            <th>Waiting Since</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="queueTable">
+          <% if (queues && queues.length > 0) { %>
+            <% queues.forEach(function(row) { %>
+              <tr>
+                <td style="font-weight: bold; color: #1a2a4d;"><%= row.queue_number %></td>
+                <td><%= row.student_name %></td>
+                <td><%= row.blk_course || '' %></td>
+                <td><%= row.year || '' %></td>
+                <td><span class="badge">Waiting</span></td>
+                <td><%= new Date(row.created_at).toLocaleTimeString() %></td>
+                <td>
+                  <a href="/process-next" class="btn-serve">Call Next</a>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="7" style="text-align: center; padding: 50px; color: #999;">No students currently in the queue for this window.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('searchQueue').addEventListener('keyup', function() {
+      let filter = this.value.toUpperCase();
+      let rows = document.querySelector("#queueTable").rows;
+      for (let i = 0; i < rows.length; i++) {
+        let firstCol = rows[i].cells[0].textContent.toUpperCase();
+        rows[i].style.display = firstCol.indexOf(filter) > -1 ? "" : "none";
+      }
+    });
+  </script>
+</body>
+</html>

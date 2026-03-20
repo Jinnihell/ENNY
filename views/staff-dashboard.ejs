@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESCR DQMS - Window <%= windowId %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+    .sidebar { width: 250px; background-color: #1a2a4d; color: white; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+    .sidebar-header { text-align: center; margin-bottom: 30px; }
+    .sidebar-header img { width: 70px; margin-bottom: 10px; }
+    .sidebar h2 { font-size: 18px; margin: 10px 0; }
+    .switch-link { color: #a1c4fd; text-decoration: none; font-size: 12px; border-bottom: 1px solid; margin-top: 10px; display: block; text-align: center; }
+    
+    /* Transaction Type Toggles */
+    .type-toggles { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .type-toggles-title { font-size: 11px; color: #a1c4fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .type-toggle-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      color: white;
+      opacity: 0.6;
+    }
+    .type-toggle-btn:hover { opacity: 1; }
+    .type-toggle-btn.active { opacity: 1; font-weight: bold; }
+    .type-toggle-btn .fa-check { float: right; }
+    .type-assessments { background: linear-gradient(135deg, #1a2a4d, #2d4a8d); }
+    .type-enrollment { background: linear-gradient(135deg, #28a745, #218838); }
+    .type-payments { background: linear-gradient(135deg, #ffc107, #ff9800); }
+    .type-other { background: linear-gradient(135deg, #dc3545, #c82333); }
+    .nav-links { margin-top: 30px; list-style: none; padding: 0; }
+    .nav-links li { margin: 10px 0; }
+    .nav-links a { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 16px; padding: 12px 15px; border-radius: 8px; }
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: rgba(255,255,255,0.1); color: #a1c4fd; }
+    .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .sidebar-footer a { color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 8px; }
+    .sidebar-footer a:hover { background: rgba(255,255,255,0.1); }
+    
+    .main-content { flex: 1; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); padding: 30px; display: flex; flex-direction: row; gap: 30px; overflow: hidden; }
+    
+    .left-section { display: flex; flex-direction: column; gap: 20px; width: 60%; }
+    .right-section { display: flex; flex-direction: column; gap: 20px; width: 40%; }
+    
+    .serving-card { background: white; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+    .serving-card h3 { margin: 0 0 20px 0; color: #1a2a4d; font-size: 42px; font-weight: bold; }
+    .serving-card img { width: 80px; margin-bottom: 10px; }
+    .queue-box { border: 3px solid #1a2a4d; border-radius: 20px; padding: 25px; margin: 15px 0; font-size: 80px; font-weight: bold; color: #1a2a4d; line-height: 1; }
+    .queue-box.serving { border-color: #28a745; color: #28a745; animation: queuePulse 2s ease-in-out infinite; }
+    @keyframes queuePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .student-info { background: #f8f9fa; border-radius: 16px; padding: 15px; text-align: left; border-left: 5px solid #1a2a4d; margin-top: 15px; }
+    .student-info p { margin: 6px 0; color: #333; }
+    .no-queue { color: #999; font-style: italic; padding: 20px; }
+    
+    .stats-container { display: flex; gap: 15px; }
+    .stat-card { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1; }
+    .stat-number { font-size: 36px; font-weight: bold; }
+    .stat-label { font-size: 12px; color: #555; }
+    .stat-card.waiting .stat-number { color: #ff8c00; }
+    .stat-card.completed .stat-number { color: #28a745; }
+    
+    .action-btns { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+    .btn { padding: 25px 30px; font-size: 20px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 15px; text-decoration: none; width: 80%; box-sizing: border-box; max-width: 400px; }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-next { background: linear-gradient(135deg, #1a2a4d, #2d4a8d); }
+    .btn-ringer { background: linear-gradient(135deg, #ff8c00, #ff6f00); }
+    .btn-stop { background: linear-gradient(135deg, #d9534f, #c9302c); }
+    .btn-complete { background: linear-gradient(135deg, #28a745, #218838); }
+    
+    /* Quick Call Buttons */
+    .type-call-btns {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    .btn-call {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-call:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .type-assessments { background: linear-gradient(135deg, #1a2a4d, #2d4a8d); }
+    .type-enrollment { background: linear-gradient(135deg, #28a745, #218838); }
+    .type-payments { background: linear-gradient(135deg, #ffc107, #ff9800); }
+    .type-other { background: linear-gradient(135deg, #dc3545, #c82333); }
+    
+    .active-windows { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .active-windows-title { font-size: 12px; color: #28a745; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .active-windows-list span { background: #e8f4fd; padding: 3px 8px; border-radius: 4px; margin-right: 5px; font-size: 12px; }
+    
+    /* Fixed Bottom Container */
+    .next-in-line-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 250px;
+      right: 0;
+      background: white;
+      padding: 15px 30px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+    .next-in-line-fixed .waiting-list {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+    }
+    .next-in-line-fixed .waiting-list h4 {
+      margin: 0 0 10px 0;
+      color: #1a2a4d;
+      font-size: 16px;
+      min-width: fit-content;
+    }
+    .next-in-line-fixed .waiting-item {
+      background: linear-gradient(135deg, #1a2a4d, #2d4a8d);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: fit-content;
+    }
+    .next-in-line-fixed .waiting-item .ticket {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .next-in-line-fixed .waiting-item .doc-type {
+      font-size: 12px;
+      color: #ff8c00;
+    }
+
+    @media screen and (max-width: 768px) {
+      body { flex-direction: column; height: auto; min-height: 100vh; }
+      .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
+      .sidebar-header { margin-bottom: 0; margin-right: 15px; display: flex; align-items: center; gap: 10px; }
+      .sidebar h2 { margin: 0; font-size: 14px; }
+      .nav-links { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; justify-content: center; }
+      .nav-links li { margin: 0; }
+      .nav-links a { padding: 8px 12px; font-size: 13px; }
+      .sidebar-footer { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 10px; border-top: none; justify-content: center; }
+      .main-content { flex-direction: column; padding: 15px; }
+      .left-section, .right-section { width: 100%; }
+      .action-btns { flex-direction: column; }
+      .btn { width: 100%; }
+      .next-in-line-fixed { left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50x50?text=ESCR'">
+      <p style="font-size: 12px; margin: 0;">East Systems Colleges of Rizal</p>
+      <h2>ESCR DQMS<br>Window No: <%= windowId %></h2>
+      <a href="/window-selection" class="switch-link">Switch Window</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/staff-dashboard" class="active"><i class="fa fa-user"></i> Dashboard</a></li>
+      <li><a href="/active-queues"><i class="fa fa-history"></i> Active Queues</a></li>
+      <li><a href="/history"><i class="fa fa-paperclip"></i> History</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="/admin-selection"><i class="fa fa-arrow-left"></i> Back to Selection</a>
+      <a href="/logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-section">
+      <div class="serving-card">
+        <h3>📌 Now Serving!</h3>
+        <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/60x60?text=ESCR'">
+        <p style="margin: 0; color: #666;">Current Queue Number</p>
+        <div class="queue-box <%= serving ? 'serving' : '' %>">
+          <%= serving ? serving.queue_number : '---' %>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
+        <% if (serving) { %>
+          <div class="student-info">
+            <p><strong><i class="fa fa-user-graduate"></i> Name:</strong> <%= serving.student_name %></p>
+            <p><strong><i class="fa fa-book"></i> Course:</strong> <%= serving.blk_course || 'N/A' %></p>
+            <p><strong><i class="fa fa-calendar"></i> Year:</strong> <%= serving.year || 'N/A' %></p>
+            <p><strong><i class="fa fa-tag"></i> Type:</strong> <%= serving.document_type %></p>
+          </div>
+        <% } else { %>
+          <p class="no-queue">No student currently in line.</p>
+        <% } %>
+      </div>
+      <div class="stats-container">
+        <div class="stat-card waiting">
+          <div class="stat-number"><%= waitingCount %></div>
+          <div class="stat-label">Waiting in Line</div>
+        </div>
+        <div class="stat-card completed">
+          <div class="stat-number"><%= completedCount %></div>
+          <div class="stat-label">Completed Today</div>
+        </div>
+      </div>
+    </div>
+    <div class="right-section">
+      <% if (activeWindows && activeWindows.length > 0) { %>
+        <div class="active-windows">
+          <div class="active-windows-title"><i class="fa fa-desktop"></i> Active Windows: <%= activeWindows.join(', ') %></div>
+          <div class="active-windows-list">
+            <% activeWindows.forEach(function(win) { %>
+              <span>W<%= win %></span>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+      <!-- Quick Call Buttons for Each Transaction Type -->
+      <div class="type-call-btns">
+        <h4 style="margin: 0 0 10px 0; color: #1a2a4d; font-size: 14px;"><i class="fa fa-bolt"></i> Quick Call - Call from any window:</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a href="/process-next/Assessments" class="btn-call type-assessments"><i class="fa fa-file-alt"></i> Assessments</a>
+          <a href="/process-next/Enrollment" class="btn-call type-enrollment"><i class="fa fa-user-plus"></i> Enrollment</a>
+          <a href="/process-next/Payments" class="btn-call type-payments"><i class="fa fa-money-bill"></i> Payments</a>
+          <a href="/process-next/Other%20Concerns" class="btn-call type-other"><i class="fa fa-question-circle"></i> Other</a>
+        </div>
+      </div>
+      
+      <div class="action-btns">
+        <a href="/process-next" class="btn btn-next"><i class="fa fa-play"></i> Start/Next</a>
+        <button class="btn btn-ringer" onclick="ringBell()"><i class="fa fa-bell"></i> Ringer</button>
+        <% if (serving) { %>
+          <a href="/complete/<%= serving.id %>" class="btn btn-complete"><i class="fa fa-check"></i> Complete</a>
+        <% } %>
+        <a href="/reset-queue" class="btn btn-stop"><i class="fa fa-stop-circle"></i> Stop/Reset</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Container for Next in Line -->
+  <% if (waitingList && waitingList.length > 0) { %>
+  <div class="next-in-line-fixed">
+    <div class="waiting-list">
+      <h4><i class="fa fa-users"></i> Upcoming Queues</h4>
+      <% waitingList.forEach(function(item) { %>
+        <div class="waiting-item">
+          <span class="ticket"><%= item.queue_number %></span>
+          <span class="doc-type"><%= item.document_type %></span>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+  <% } %>
+
+  <script>
+    function ringBell() {
+      // Try to play audio
+      try {
+        // Create a simple beep sound using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.frequency.value = 1000; // 1000Hz
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.5);
+        
+        // Second ring
+        setTimeout(() => {
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.frequency.value = 1000;
+          osc2.type = 'sine';
+          gain2.gain.setValueAtTime(0.5, audioCtx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+          osc2.start(audioCtx.currentTime);
+          osc2.stop(audioCtx.currentTime + 0.5);
+        }, 250);
+      } catch(e) {
+        alert('🔔 Ding! Your turn!');
+      }
+    }
+  </script>
+</body>
+</html>

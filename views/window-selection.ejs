@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Window - ESCR DQMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); min-height: 100vh; position: relative; }
+    
+    .header { display: flex; align-items: center; justify-content: space-between; padding: clamp(15px, 3vw, 20px) clamp(20px, 5vw, 40px); border-bottom: 2px solid #e0e0e0; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 15px; }
+    .logo-box { display: flex; align-items: center; gap: 15px; }
+    .logo-box img { width: clamp(35px, 8vw, 50px); }
+    .logo-box span { font-weight: bold; font-size: clamp(14px, 2.5vw, 16px); color: #1a2a4d; }
+
+    .container { text-align: center; margin-top: clamp(20px, 5vw, 60px); padding: 20px; box-sizing: border-box; min-height: calc(100vh - 100px); display: flex; flex-direction: column; position: relative; }
+    h2 { font-weight: 800; font-size: clamp(22px, 5vw, 28px); margin-bottom: 10px; color: #1a2a4d; }
+    p { font-size: clamp(14px, 2.5vw, 16px); margin-bottom: clamp(30px, 5vw, 50px); color: #666; }
+
+    .window-grid { 
+        display: flex; 
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: clamp(15px, 3vw, 20px); 
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 10px;
+    }
+
+    .window-btn {
+        background: linear-gradient(135deg, #1a2a4d 0%, #2d4a8d 100%);
+        color: white;
+        padding: clamp(30px, 5vw, 45px) clamp(40px, 8vw, 70px);
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(26,42,77,0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        min-width: 240px;
+        flex: 1;
+        max-width: 320px;
+    }
+
+    .window-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(26,42,77,0.4);
+    }
+
+    .window-btn i { font-size: clamp(28px, 5vw, 40px); }
+    .win-title { font-size: clamp(18px, 3vw, 24px); font-weight: 800; }
+    .win-assignment { font-size: clamp(12px, 2vw, 14px); opacity: 0.9; }
+
+    .window-btn.selected {
+        box-shadow: 0 0 0 4px #1a2a4d, 0 15px 35px rgba(26,42,77,0.4);
+        background: linear-gradient(135deg, #1a2a4d 0%, #2d4a8d 100%);
+       
+    }
+
+    .back-link {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        color: #1a2a4d;
+        text-decoration: none;
+        font-size: clamp(14px, 2.5vw, 16px);
+        font-weight: 600;
+        padding: 12px 25px;
+        border-radius: 10px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .back-link:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .container {
+        position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-box">
+      <img src="/images/escr-logo.png" alt="Logo" style="width: 70px;" onerror="this.src='https://via.placeholder.com/70x70?text=ESCR'">
+      <span>East Systems Colleges of Rizal</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Welcome to ESCR Queueing System</h2>
+    <p>Please select your serving - window number...</p>
+
+    <form action="/window-selection" method="POST" class="window-grid">
+      <button type="submit" name="window" value="1" class="window-btn <%= windowId === 1 ? 'selected' : '' %>">
+        <i class="fa fa-clipboard-check"></i>
+        <span class="win-title">Window 1</span>
+        <span class="win-assignment">Assessments</span>
+      </button>
+
+      <button type="submit" name="window" value="2" class="window-btn <%= windowId === 2 ? 'selected' : '' %>">
+        <i class="fa fa-user-plus"></i>
+        <span class="win-title">Window 2</span>
+        <span class="win-assignment">Enrollment</span>
+      </button>
+
+      <button type="submit" name="window" value="3" class="window-btn <%= windowId === 3 ? 'selected' : '' %>">
+        <i class="fa fa-credit-card"></i>
+        <span class="win-title">Window 3</span>
+        <span class="win-assignment">Payments</span>
+      </button>
+
+      <button type="submit" name="window" value="4" class="window-btn <%= windowId === 4 ? 'selected' : '' %>">
+        <i class="fa fa-concierge-bell"></i>
+        <span class="win-title">Window 4</span>
+        <span class="win-assignment">Other Concerns / Docs</span>
+      </button>
+    </form>
+    
+    <a href="/admin-selection" class="back-link"><i class="fa fa-arrow-left"></i> Back to Selection</a>
+  </div>
+</body>
+</html>
+

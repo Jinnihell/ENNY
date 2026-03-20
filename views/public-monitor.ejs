@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIVE QUEUE MONITOR - ESCR</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0b162c; color: white; margin: 0; padding: 0; overflow: hidden; }
+    .layout-container { display: flex; height: 100vh; width: 100vw; }
+    
+    /* LEFT SIDE: QUEUE CONTENT (55%) */
+    .queue-section { width: 55%; padding: clamp(10px, 2vw, 20px); display: flex; flex-direction: column; box-sizing: border-box; }
+    
+    .header { display: flex; align-items: center; gap: 20px; background: rgba(255,255,255,0.05); padding: clamp(8px, 2vw, 10px) clamp(15px, 4vw, 30px); border-radius: 15px; margin-bottom: clamp(10px, 3vw, 20px); flex-wrap: wrap; }
+    .header img { width: clamp(40px, 8vw, 60px); height: auto; }
+    .header h2 { margin: 0; font-size: clamp(16px, 3vw, 24px); }
+    .header .live-clock { color: #ff8c00; font-weight: bold; font-size: clamp(12px, 2vw, 16px); }
+    
+    .monitor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(10px, 3vw, 20px); flex-grow: 1; }
+    
+    .window-card { background: white; color: #1a2a4d; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-bottom: 8px solid #ff8c00; padding: clamp(10px, 3vw, 20px); min-height: clamp(120px, 25vh, 200px); box-sizing: border-box; }
+    
+    .window-label { font-size: clamp(14px, 3vw, 28px); font-weight: bold; background: #1a2a4d; color: white; padding: clamp(3px, 1vw, 5px) clamp(12px, 3vw, 25px); border-radius: 8px; position: absolute; top: 15px; }
+    
+    .queue-number { font-size: clamp(50px, 15vw, 130px); font-weight: 900; margin-top: 20px; line-height: 1; }
+    
+    .category-label { font-size: clamp(14px, 3vw, 22px); color: #ff8c00; font-weight: bold; }
+
+    /* MIDDLE SIDE: WAITING QUEUES (20%) */
+    .waiting-sidebar { width: 20%; background: #ffffff; border-left: 4px solid #1a2a4d; display: flex; flex-direction: column; padding: clamp(8px, 2vw, 15px); overflow-y: auto; box-sizing: border-box; }
+    
+    .waiting-header { text-align: center; padding-bottom: 15px; border-bottom: 2px solid #ff8c00; margin-bottom: 15px; }
+    .waiting-header h2 { margin: 0; color: #250558; font-size: clamp(18px, 4vw, 32px); font-weight: bold; }
+    .waiting-header h3 { margin: 0; color: black; font-size: clamp(18px, 4vw, 32px); font-weight: bold; }
+    .waiting-header p { margin: 5px 0 0; color: #0f071f; font-size: clamp(10px, 2vw, 14px); }
+    
+    .waiting-item { background: #1a2a4d; color: white; padding: clamp(8px, 2vw, 17px) clamp(10px, 3vw, 20px); border-radius: 8px; font-size: clamp(24px, 6vw, 46px); font-weight: bold; margin-bottom: 8px; text-align: center; }
+    .waiting-item .num { color: #ff8c00; }
+    .no-waiting { color: #999; font-size: clamp(10px, 2vw, 14px); text-align: center; padding: 20px; }
+
+    /* RIGHT SIDE: VIDEO SIDEBAR (25%) */
+    .video-sidebar { width: 25%; background: #000; border-left: 4px solid #ff8c00; display: flex; flex-direction: column; }
+    
+    .video-container { width: 100%; aspect-ratio: 16/9; background: #222; }
+    .video-container iframe, .video-container #player { width: 100%; height: 100%; }
+    
+    .announcement-box { padding: clamp(10px, 3vw, 20px); flex-grow: 1; font-size: clamp(12px, 2.5vw, 20px); background: #1a2a4d; border-top: 4px solid #ff8c00; box-sizing: border-box; overflow-y: auto; }
+    .announcement-box h3 { color: #ff8c00; font-size: clamp(14px, 3vw, 20px); margin: 0 0 10px 0; }
+    .announcement-box p { margin: 8px 0; font-size: clamp(11px, 2vw, 15px); }
+
+    .footer-ticker { height: clamp(35px, 8vw, 50px); background: #ff8c00; color: #1a2a4d; font-size: clamp(12px, 2.5vw, 22px); font-weight: bold; display: flex; align-items: center; width: 100%; position: absolute; bottom: 0; overflow: hidden; }
+    .ticker-content { white-space: nowrap; animation: ticker 20s linear infinite; padding-left: 100%; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+    /* Responsive: Tablet and below */
+    @media screen and (max-width: 1024px) {
+      .layout-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+      }
+      
+      .queue-section {
+        width: 100%;
+        min-height: 50vh;
+      }
+      
+      .monitor-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .waiting-sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-left: none;
+        border-top: 4px solid #1a2a4d;
+      }
+      
+      .waiting-header {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .waiting-item {
+        flex: 0 0 auto;
+        margin-right: 10px;
+      }
+      
+      .video-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 4px solid #ff8c00;
+      }
+      
+      .announcement-box {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout-container">
+    <div class="queue-section">
+      <div class="header">
+        <img src="/images/escr-logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/60x60?text=ESCR'">
+        <div>
+          <h2>LIVE QUEUE MONITOR - ESCR</h2>
+          <div id="live-clock" class="live-clock"></div>
+        </div>
+      </div>
+      <div class="monitor-grid" id="queue-display"></div>
+    </div>
+    <div class="waiting-sidebar">
+      <div class="waiting-header">
+        <h2>WAITING QUEUES</h2>
+        <h3>NOW SERVING</h3>
+        <p>Total Waiting: <span id="total-waiting">0</span></p>
+      </div>
+      <div id="waiting-display"></div>
+    </div>
+    <div class="video-sidebar">
+      <div class="video-container">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="announcement-box">
+        <h3><i class="fa fa-bullhorn"></i> ANNOUNCEMENTS</h3>
+        <p>• Enrollment for Mid-Year 2026 is now open.</p>
+        <p>• Please prepare your Student ID and Assessment form.</p>
+        <p>• Free WiFi is available in the student lounge.</p>
+        <p>• Operating hours: 8:00 AM - 5:00 PM</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-ticker">
+    <div class="ticker-content">Welcome to East Systems Colleges of Rizal! Kindly check your queue number on the display monitor and proceed to your assigned window. Thank you!</div>
+  </div>
+
+  <script>
+    let lastNumbers = {};
+    let lastWaiting = [];
+    
+    function updateClock() {
+      const now = new Date();
+      const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      document.getElementById('live-clock').innerHTML = now.toLocaleTimeString('en-US', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function announceNumber(num, win) {
+      if ('speechSynthesis' in window) {
+        const msg = new SpeechSynthesisUtterance(`Ticket ${num} proceed to window ${win}`);
+        msg.rate = 0.85;
+        msg.volume = 1;
+        msg.pitch = 1;
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    function fetchQueues() {
+      fetch('/api/monitor-data')
+        .then(res => res.json())
+        .then(data => {
+          let html = "";
+          let waitingHtml = "";
+          let allWaiting = [];
+          
+          data.forEach(item => {
+            let isNew = (item.number !== "---" && lastNumbers[item.window] !== item.number);
+            if (isNew) {
+              announceNumber(item.number, item.window);
+              lastNumbers[item.window] = item.number;
+            }
+            
+            html += `
+              <div class="window-card">
+                <div class="window-label">WINDOW ${item.window}</div>
+                <div class="queue-number">${item.number}</div>
+                <div class="category-label">${item.category}</div>
+              </div>`;
+            
+            if (item.waiting && item.waiting.length > 0) {
+              item.waiting.forEach((wq) => {
+                if (!allWaiting.includes(wq)) {
+                  allWaiting.push(wq);
+                }
+              });
+            }
+          });
+          
+          allWaiting.sort((a, b) => {
+            const numA = parseInt(a.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.replace(/\D/g, '')) || 0;
+            return numA - numB;
+          });
+          
+          allWaiting.forEach((wq) => {
+            waitingHtml += `<div class="waiting-item"><span class="num">${wq}</span></div>`;
+          });
+          
+          if (waitingHtml === "") {
+            waitingHtml = '<div class="no-waiting">No waiting queues</div>';
+          }
+          
+          document.getElementById('total-waiting').innerText = allWaiting.length;
+          document.getElementById('queue-display').innerHTML = html;
+          document.getElementById('waiting-display').innerHTML = waitingHtml;
+        })
+        .catch(err => console.error('Error:', err));
+    }
+
+    setInterval(fetchQueues, 3000);
+    fetchQueues();
+  </script>
+</body>
+</html>
