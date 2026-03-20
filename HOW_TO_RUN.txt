@@ -1,0 +1,33 @@
+# How to Run the Application
+
+## Step 1: Open Command Prompt
+1. Press Windows + R on your keyboard
+2. Type: cmd
+3. Press Enter
+
+## Step 2: Navigate to the Project Folder
+In the Command Prompt window, type:
+
+```
+cd c:\xampp\htdocs\start - Copy
+```
+
+## Step 3: Start the Server
+Type this command and press Enter:
+
+```
+npm start
+```
+
+## Step 4: Open the Website
+1. Wait a few seconds for the server to start
+2. Open your web browser (Chrome, Firefox, Edge, etc.)
+3. Type this in the address bar:
+
+```
+http://localhost:3000
+```
+
+## Note:
+- Keep the Command Prompt window open while using the app
+- Press Ctrl+C to stop the server when done

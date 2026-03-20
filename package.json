@@ -1,0 +1,41 @@
+{
+  "name": "escr-dqms",
+  "version": "1.0.0",
+  "description": "ESCR Digital Queue Management System",
+  
+  "scripts": {
+    "start": "ts-node src/database/app.ts",
+    "start:ts": "ts-node src/database/app.ts",
+    "build": "tsc",
+    "migrate": "ts-node src/database/migrate.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mysql2": "^3.6.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/escr-dqms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/escr-dqms/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/escr-dqms#readme",
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^25.5.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

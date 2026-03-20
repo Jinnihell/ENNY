@@ -1,0 +1,143 @@
+<?php 
+include 'auth_check.php'; // Proteksyon para sa login
+include 'db_config.php'; 
+
+// Proteksyon para sa ROLE (Para hindi ma-access ng basta-bastang user ang admin page)
+if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'staff') {
+    header("Location: login.php?error=unauthorized");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Selection - ESCR DQMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="responsive.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #b7ffd8 0%, #e1f5fe 50%, #90caf9 100%); height: 100vh; overflow: hidden; }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 2px solid #e0e0e0; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .logo-box { display: flex; align-items: center; gap: 15px; }
+        .logo-box img { width: 50px; }
+        .logo-box span { font-weight: bold; font-size: 16px; color: #1a2a4d; }
+        .container { text-align: center; margin-top: 80px; padding: 20px; }
+        .container h2 { color: #1a2a4d; font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+        .container p { color: #666; font-size: 16px; margin-bottom: 40px; }
+        .selection-box { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .admin-btn {
+            background: linear-gradient(135deg, #1a2a4d 0%, #2d4a8d 100%);
+            color: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(26,42,77,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            letter-spacing: 1px;
+            box-sizing: border-box;
+        }
+        .admin-btn:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(26,42,77,0.4); }
+        .admin-btn:active { transform: translateY(0); }
+        .admin-btn.logout { background: linear-gradient(135deg, #d9534f, #c9302c); box-shadow: 0 8px 25px rgba(217,83,79,0.3); }
+        .admin-btn.logout:hover { box-shadow: 0 12px 30px rgba(217,83,79,0.4); }
+        .help-icon { width: 40px; height: 40px; border: 2px solid #1a2a4d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #1a2a4d; cursor: pointer; transition: all 0.3s; }
+        .help-icon:hover { background: #1a2a4d; color: white; }
+        
+        /* Modal styling */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background-color: #fff; padding: 40px; border-radius: 25px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.3s ease-out; border-top: 5px solid #1a2a4d; box-sizing: border-box; }
+        .modal-content h2 { color: #1a2a4d; font-size: 24px; }
+        .modal-content p { color: #555; line-height: 1.8; font-size: 15px; text-align: left; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .close-modal-btn { background: linear-gradient(135deg, #1a2a4d, #2d4a8d); color: white; padding: 12px 35px; border: none; border-radius: 12px; margin-top: 25px; cursor: pointer; font-weight: bold; font-size: 15px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(26,42,77,0.3); }
+        .close-modal-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,42,77,0.4); }
+
+        /* Responsive */
+        @media screen and (max-width: 768px) {
+            body { height: auto; min-height: 100vh; }
+            .header { flex-direction: column; gap: 15px; padding: 15px; }
+            .container { margin-top: 40px; }
+            .container h2 { font-size: 22px; }
+            .container p { font-size: 14px; margin-bottom: 30px; }
+            .admin-btn { padding: 20px; font-size: 18px; }
+            .selection-box { gap: 15px; }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container h2 { font-size: 18px; }
+            .admin-btn { padding: 15px; font-size: 16px; }
+            .help-icon { width: 35px; height: 35px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-box">
+            <img src="escr-logo.png" alt="Logo">
+            <span>East Systems Colleges of Rizal</span>
+        </div>
+        <div class="help-icon" onclick="toggleModal('helpModal')">?</div>
+    </div>
+
+    <div class="container">
+        <h2>Welcome to ESCR Queueing Management System</h2>
+        <p>Please select interface......</p>
+
+        <div class="selection-box">
+            <a href="window_selection.php" class="admin-btn"><i class="fa fa-desktop"></i> User Interface</a>
+            <a href="ReportsAndSettingsMenu.php" class="admin-btn"><i class="fa fa-chart-bar"></i> Reports & Settings</a>
+            <a href="logout.php" class="admin-btn logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #1a237e;">Admin Selection Help</h2>
+            <p>1. <b>User Interface</b> - Click to access the window selection for serving students.<br>
+            2. <b>Reports & Settings</b> - Click to access reports and system settings.<br>
+            3. <b>Logout</b> - Click to securely logout from the system.</p>
+            <button class="close-modal-btn" onclick="toggleModal('helpModal')">I See</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            } else {
+                modal.classList.add('active');
+            }
+        }
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
